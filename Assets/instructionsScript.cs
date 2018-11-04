@@ -25,15 +25,15 @@ public class instructionsScript : MonoBehaviour {
     private int randomLabel1, randomLabel2, randomLabel3, randomLabel4, correctBtn = 1;
     private int[] edgework = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     private string buttonOneColorString, buttonTwoColorString, buttonThreeColorString, buttonFourColorString = "oof here's some placeholder text";
-    private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD"};
-    private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED" };
-    private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS" };
+    private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD", "OH CRAP, THE TEXT\nGOES OFF THE SCREEN", "E" };
+    private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED", "*INSERT CLAP\nEMOJI HERE", "WOOOOOOOO!" };
+    private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS", "DEFINITELY NOT\nA BUG :)))))", "KABOOOOM!" };
     
-    // Use this for initialization
+    // Use this for initialization (and putting memes on the screen)
     void Start () {
         _moduleID = _moduleIDCounter++;
         Module.OnActivate += Activate;
-        screen.text = startingScreens[Random.Range(0, 5)];
+        screen.text = startingScreens[Random.Range(0, 7)];
     }
 
     private void Awake()
@@ -133,9 +133,12 @@ public class instructionsScript : MonoBehaviour {
 
         screen.text = screens13[screen1];
 
-        Debug.LogFormat("[Instructions #{0}] The screens, in reading order, say, '{1}', '{2}, '{3}', '{4}', and '{5}'.",
-            _moduleID, screens13[screen1], screens245[screen2], screens13[screen3], screens245[screen4], screens245[screen5]);
-    
+        Debug.LogFormat("[Instructions #{0}] The first screen says {1}.", _moduleID, screens13[screen1]);
+        Debug.LogFormat("[Instructions #{0}] The second screen says {1}.", _moduleID, screens245[screen2]);
+        Debug.LogFormat("[Instructions #{0}] The third screen says {1}.", _moduleID, screens13[screen3]);
+        Debug.LogFormat("[Instructions #{0}] The fourth screen says {1}.", _moduleID, screens245[screen4]);
+        Debug.LogFormat("[Instructions #{0}] The fifth screen says {1}.", _moduleID, screens245[screen5]);
+
         // Edgework gets added to the edgework array
 
         edgework[0] = Info.GetBatteryCount();
@@ -645,7 +648,7 @@ public class instructionsScript : MonoBehaviour {
             for (int i = 0; i < 5; i++)
             {
                 screenButtons[i].material.color = new Color32(0, 255, 0, 255);
-                screen.text = solveMessages[Random.Range(0,5)];
+                screen.text = solveMessages[Random.Range(0,7)];
             }
 
         }
@@ -662,7 +665,7 @@ public class instructionsScript : MonoBehaviour {
 
     IEnumerator test()
     {
-        screen.text = failureMessages[Random.Range(0, 5)];
+        screen.text = failureMessages[Random.Range(0, 7)];
 
         for (int i = 0; i < 5; i++)
         {
@@ -721,5 +724,5 @@ public class instructionsScript : MonoBehaviour {
 
         
     }
-
+    
 }
