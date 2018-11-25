@@ -12,6 +12,7 @@ public class instructionsScript : MonoBehaviour {
     public MeshRenderer[] screenButtons;
     public TextMesh label1, label2, label3, label4, screen;
     public MeshRenderer buttonOne, buttonTwo, buttonThree, buttonFour;
+    public GameObject ModuleObject;
 
     private static int _moduleIDCounter = 1;
     private int _moduleID = 0;
@@ -25,15 +26,16 @@ public class instructionsScript : MonoBehaviour {
     private int randomLabel1, randomLabel2, randomLabel3, randomLabel4, correctBtn = 1;
     private int[] edgework = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  
     private string buttonOneColorString, buttonTwoColorString, buttonThreeColorString, buttonFourColorString = "oof here's some placeholder text";
-    private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD", "OH CRAP, THE TEXT\nGOES OFF THE SCREEN", "E", "OH SHOOT\nIT'S A BOMB" };
-    private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED", "*INSERT CLAP\nEMOJI HERE", "WOOOOOOOO!", "OH CRAP YOU\nACTUALLY DID IT" };
-    private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS", "DEFINITELY NOT\nA BUG :)))))", "KABOOOOM!", ":(" };
-    
+    private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD", "OH CRAP, THE TEXT\nGOES OFF THE SCREEN", "E", "OH SHOOT\nIT'S A BOMB", "HEY I'M YOUR\nFAVORITE MODULE,\nRIGHT?" };
+    private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED", "*INSERT CLAP\nEMOJI HERE*", "WOOOOOOOO!", "OH CRAP YOU\nACTUALLY DID IT", "THAT WAS NICE\nOWO" };
+    private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS", "DEFINITELY NOT\nA BUG :)))))", "KABOOOOM!", ":(", "THIS IS SO SAD\nALEXA, PLAY\nDESPACITO" };
+    private int variableThatImTooLazyToNameProperlyDontWorryAboutItMan = 0;
+
     // Use this for initialization (and putting memes on the screen)
     void Start () {
         _moduleID = _moduleIDCounter++;
         Module.OnActivate += Activate;
-        screen.text = startingScreens[Random.Range(0, 8)];
+        screen.text = startingScreens[Random.Range(0, 9)];
     }
 
     private void Awake()
@@ -648,10 +650,10 @@ public class instructionsScript : MonoBehaviour {
             for (int i = 0; i < 5; i++)
             {
                 screenButtons[i].material.color = new Color32(0, 255, 0, 255);
-                screen.text = solveMessages[Random.Range(0,8)];
+                screen.text = solveMessages[Random.Range(0,9)];
             }
-
         }
+
         else
         {
             Module.HandleStrike();
@@ -659,13 +661,12 @@ public class instructionsScript : MonoBehaviour {
             Debug.LogFormat("[Instructions #{0}] Button {1} was pressed. Strike.", _moduleID, btnNumber + 1);
 
             StartCoroutine("test");
-            
         }
     }
 
     IEnumerator test()
     {
-        screen.text = failureMessages[Random.Range(0, 8)];
+        screen.text = failureMessages[Random.Range(0, 9)];
 
         for (int i = 0; i < 5; i++)
         {
@@ -721,61 +722,54 @@ public class instructionsScript : MonoBehaviour {
         {
             screen.text = screens245[screen5];
         }
-
-        
     }
 
-    public string TwitchHelpMessage = "!{0} press 1 will press the first button at the bottom, !{0} press 2 will press the second button, etc. !{0} screen 1 will go to the first screen of the module, !{0} screen 2 will go to the second screen, etc.";
-    public KMSelectable[] ProcessTwitchCommand(string command)
+    public string TwitchHelpMessage = "!{0} press 1 will press the first button at the bottom, !{0} press 2 will press the second button, etc. You can do !{0} cycle to cycle through all of the screens.";
+    IEnumerator ProcessTwitchCommand(string command)
     {
         if (command.ToLower().Equals("press 1"))
         {
-            return new KMSelectable[] { buttons[0] };
+            yield return null;
+            yield return new KMSelectable[] { buttons[0] };
         }
 
         else if (command.ToLower().Equals("press 2"))
         {
-            return new KMSelectable[] { buttons[1] };
+            yield return null;
+            yield return new KMSelectable[] { buttons[1] };
         }
 
         else if (command.ToLower().Equals("press 3"))
         {
-            return new KMSelectable[] { buttons[2] };
+            yield return null;
+            yield return new KMSelectable[] { buttons[2] };
         }
 
         else if (command.ToLower().Equals("press 4"))
         {
-            return new KMSelectable[] { buttons[3] };
+            yield return null;
+            yield return new KMSelectable[] { buttons[3] };
         }
 
-        else if (command.ToLower().Equals("screen 1"))
+        else if (command.ToLower().Equals("cycle"))
         {
-            return new KMSelectable[] { screenButtonSelectables[0] };
-        }
-
-        else if (command.ToLower().Equals("screen 2"))
-        {
-            return new KMSelectable[] { screenButtonSelectables[1] };
-        }
-
-        else if (command.ToLower().Equals("screen 3"))
-        {
-            return new KMSelectable[] { screenButtonSelectables[2] };
-        }
-
-        else if (command.ToLower().Equals("screen 4"))
-        {
-            return new KMSelectable[] { screenButtonSelectables[3] };
-        }
-
-        else if (command.ToLower().Equals("screen 5"))
-        {
-            return new KMSelectable[] { screenButtonSelectables[4] };
+            yield return null;
+            yield return new KMSelectable[] { screenButtonSelectables[0] };
+            yield return new WaitForSeconds(.5f);
+            yield return new KMSelectable[] { screenButtonSelectables[1] };
+            yield return new WaitForSeconds(2);
+            yield return new KMSelectable[] { screenButtonSelectables[2] };
+            yield return new WaitForSeconds(2);
+            yield return new KMSelectable[] { screenButtonSelectables[3] };
+            yield return new WaitForSeconds(2);
+            yield return new KMSelectable[] { screenButtonSelectables[4] };
+            yield return new WaitForSeconds(2);
+            yield return new KMSelectable[] { screenButtonSelectables[0] };
         }
 
         else
         {
-            return null;
+            yield break;
         }
     }
     
