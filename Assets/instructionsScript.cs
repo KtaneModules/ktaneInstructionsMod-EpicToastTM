@@ -26,16 +26,16 @@ public class instructionsScript : MonoBehaviour {
     private int randomLabel1, randomLabel2, randomLabel3, randomLabel4, correctBtn = 1;
     private int[] edgework = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  
     private string buttonOneColorString, buttonTwoColorString, buttonThreeColorString, buttonFourColorString = "oof here's some placeholder text";
-    private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD", "OH CRAP, THE TEXT\nGOES OFF THE SCREEN", "E", "OH SHOOT\nIT'S A BOMB", "HEY I'M YOUR\nFAVORITE MODULE,\nRIGHT?" };
-    private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED", "*INSERT CLAP\nEMOJI HERE*", "WOOOOOOOO!", "OH CRAP YOU\nACTUALLY DID IT", "THAT WAS NICE\nOWO" };
-    private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS", "DEFINITELY NOT\nA BUG :)))))", "KABOOOOM!", ":(", "THIS IS SO SAD\nALEXA, PLAY\nDESPACITO" };
+    private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD", "OH CRAP, THE TEXT\nGOES OFF THE SCREEN", "E", "OH SHOOT\nIT'S A BOMB", "HEY I'M YOUR\nFAVORITE MODULE,\nRIGHT?", "\n\n\n\n\n\n\n\n\n\n\n\nI'M DOWN HERE NOW", "STOP READING THE GITHUB" };
+    private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED", "*INSERT CLAP\nEMOJI HERE*", "WOOOOOOOO!", "OH CRAP YOU\nACTUALLY DID IT", "THAT WAS NICE\nOWO", "+6 POINTS!" };
+    private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS", "DEFINITELY NOT\nA BUG :)))))", "KABOOOOM!", ":(", "THIS IS SO SAD\nALEXA, PLAY\nDESPACITO", "BETTER CHECK\nTHE LOG!" };
     private int variableThatImTooLazyToNameProperlyDontWorryAboutItMan = 0;
 
     // Use this for initialization (and putting memes on the screen)
     void Start () {
         _moduleID = _moduleIDCounter++;
         Module.OnActivate += Activate;
-        screen.text = startingScreens[Random.Range(0, 9)];
+        screen.text = startingScreens[Random.Range(0, 10)];
     }
 
     private void Awake()
@@ -600,22 +600,13 @@ public class instructionsScript : MonoBehaviour {
 
         else if (screen2Position != screen4Position)
         {
-            if (screen4Position != screen5Position)
+            if (screen2Position != screen4Position && screen4Position != screen5Position && screen2Position != screen5Position)
             {
-                if (screen2Position != screen5Position)
+                for (int i = 0; i < 4; i++)
                 {
-                    for (var i = 1; i < 5; i++)
+                    if (i != screen2Position && i != screen4Position && i != screen5Position)
                     {
-                        if (screen2Position != i)
-                        {
-                            if (screen4Position != i)
-                            {
-                                if (screen5Position != i)
-                                {
-                                    correctBtn = i;
-                                }
-                            }
-                        }
+                        correctBtn = i;
                     }
                 }
             }
@@ -650,7 +641,7 @@ public class instructionsScript : MonoBehaviour {
             for (int i = 0; i < 5; i++)
             {
                 screenButtons[i].material.color = new Color32(0, 255, 0, 255);
-                screen.text = solveMessages[Random.Range(0,9)];
+                screen.text = solveMessages[Random.Range(0,10)];
             }
         }
 
@@ -666,7 +657,7 @@ public class instructionsScript : MonoBehaviour {
 
     IEnumerator test()
     {
-        screen.text = failureMessages[Random.Range(0, 9)];
+        screen.text = failureMessages[Random.Range(0, 10)];
 
         for (int i = 0; i < 5; i++)
         {

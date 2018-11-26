@@ -2889,6 +2889,7 @@ MonoBehaviour:
   buttonTwo: {fileID: 23612483464679558}
   buttonThree: {fileID: 23287376110181758}
   buttonFour: {fileID: 23098537883249796}
+  ModuleObject: {fileID: 1649964835396638}
   TwitchHelpMessage: '!{0} press 1 will press the first button at the bottom, !{0}
     press 2 will press the second button, etc. !{0} screen 1 will go to the first
     screen of the module, !{0} screen 2 will go to the second screen, etc.'
