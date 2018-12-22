@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 using KMHelper;
 using System.Collections;
+using System;
+using Random = UnityEngine.Random;
 
 public class instructionsScript : MonoBehaviour {
-    
+
     public KMAudio Audio;
     public KMBombModule Module;
     public KMBombInfo Info;
+    public KMRuleSeedable Ruleseed;
     public KMSelectable[] buttons;
     public KMSelectable[] screenButtonSelectables;
     public MeshRenderer[] screenButtons;
@@ -18,24 +21,32 @@ public class instructionsScript : MonoBehaviour {
     private int _moduleID = 0;
     private bool _solved = false, _lightsOn = false;
 
-    private int screen1, screen2, screen3, screen4, screen5, counter, buttonOneColor, buttonTwoColor, buttonThreeColor, buttonFourColor, screen2Position, screen4Position, screen5Position = 0;
-    private string[] screens13 = { "BATTERIES", "BATTERY\nHOLDERS", "INDICATORS", "LIT INDICATORS", "UNLIT\nINDICATORS", "PORTS", "PORT PLATES", "DIGITS IN\nSERIAL NUMBER",
+    private int counter;
+    private string[] edgeworkPossibilities = { "BATTERIES", "BATTERY\nHOLDERS", "INDICATORS", "LIT INDICATORS", "UNLIT\nINDICATORS", "PORTS", "PORT PLATES", "DIGITS IN\nSERIAL NUMBER",
         "LETTERS IN\nSERIAL NUMBER", "MODULES" };
-    private string[] screens245 = { "RED", "GREEN", "YELLOW", "BLUE", "A", "B", "C", "D", "FIRST", "SECOND", "THIRD", "FOURTH" };
+    private string[] buttonPossibilities = { "RED", "GREEN", "YELLOW", "BLUE", "A", "B", "C", "D", "FIRST", "SECOND", "THIRD", "FOURTH" };
     private string[] labels = { "A", "B", "C", "D" };
-    private int randomLabel1, randomLabel2, randomLabel3, randomLabel4, correctBtn = 1;
-    private int[] edgework = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  
-    private string buttonOneColorString, buttonTwoColorString, buttonThreeColorString, buttonFourColorString = "oof here's some placeholder text";
-    private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD", "OH CRAP, THE TEXT\nGOES OFF THE SCREEN", "E", "OH SHOOT\nIT'S A BOMB", "HEY I'M YOUR\nFAVORITE MODULE,\nRIGHT?", "\n\n\n\n\n\n\n\n\n\n\n\nI'M DOWN HERE NOW", "CONGRATULATIONS\nYOU FOUND AN\nEASTER EGG", "STOP READING THE GITHUB" };
-    private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED", "*INSERT CLAP\nEMOJI HERE*", "WOOOOOOOO!", "OH CRAP YOU\nACTUALLY DID IT", "THAT WAS NICE\nOWO", "+6 POINTS!", "AW MAN, NOW\nNOBODY CARES\nABOUT ME :(" };
-    private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS", "DEFINITELY NOT\nA BUG :)))))", "KABOOOOM!", ":(", "THIS IS SO SAD\nALEXA, PLAY\nDESPACITO", "BETTER CHECK\nTHE LOG!", "REVENGE!!!" };
-    private int variableThatImTooLazyToNameProperlyDontWorryAboutItMan = 0;
+    private int correctBtn;
+    private int[] edgework = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD", "OH CRAP, THE TEXT\nGOES OFF THE SCREEN", "E", "OH SHOOT\nIT'S A BOMB", "HEY I'M YOUR\nFAVORITE MODULE,\nRIGHT?", "\n\n\n\n\n\n\n\n\n\n\n\nI'M DOWN HERE NOW", "CONGRATULATIONS\nYOU FOUND AN\nEASTER EGG", "ARE YOU GOING TO\nBLOW UP THIS\nBOMB?", "STOP READING THE GITHUB" };
+    private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED", "*INSERT CLAP\nEMOJI HERE*", "WOOOOOOOO!", "OH CRAP YOU\nACTUALLY DID IT", "THAT WAS NICE\nOWO", "+6 POINTS!", "AW MAN, NOW\nNOBODY CARES\nABOUT ME :(", ":OK_HAND:" };
+    private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS", "DEFINITELY NOT\nA BUG :)))))", "KABOOOOM!", ":(", "THIS IS SO SAD\nALEXA, PLAY\nDESPACITO", "BETTER CHECK\nTHE LOG!", "REVENGE!!!", "O\nO\nF" };
+    private int[,] screens = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
+    private bool[] edgeworkScreens = { true, false, true, false, false };
+    private int[] edgeworkScreenNumbers = { 0, 2 };
+    private int[] notEdgeworkScreenNumbers = { 1, 3, 4 };
+    private int[,] buttonTypes = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
 
+    private int[] rulesUsed = { 0, 38, 45, 21, 48 };
+    
+    private int[,] answersUsed = { { 2, 4, 1, 3 }, { 0, 1, 0, 0 }, { 0, 4, 0, 0 }, { 3, 0, 0, 0 }, { 4, 1, 2, 4 }, { 0, 3, 0, 0 } };
+    // Answer types: simple answer, answer furthest to the left, answer furthest to the right, count answer, not any others
+    
     // Use this for initialization (and putting memes on the screen)
     void Start () {
         _moduleID = _moduleIDCounter++;
         Module.OnActivate += Activate;
-        screen.text = startingScreens[Random.Range(0, 11)];
+        screen.text = startingScreens[Random.Range(0, 12)];
     }
 
     private void Awake()
@@ -60,14 +71,89 @@ public class instructionsScript : MonoBehaviour {
             };
         }
     }
+
     void Activate()
     {
         Init();
         _lightsOn = true;
-        
+
+        GenerateEdgework();
     }
+
     void Init()
     {
+        var rnd = Ruleseed.GetRNG();
+        // The KMBombInfo below is completely useless and because I'm too lazy to find out how to get rid of them and not get errors
+
+        int arrayPos = 0;
+        int notArrayPos = 0;
+
+        if (rnd.Seed != 1)
+        {
+            // Randomize screens
+            for (int screenNum = 0; screenNum < 5; screenNum++)
+            {
+                edgeworkScreens[screenNum] = false;
+            }
+
+            for (int i = 0; i < 2; i++)
+            {
+                int rndNumber = rnd.Next(5);
+
+                if (edgeworkScreens[rndNumber])
+                {
+                    rndNumber = (rndNumber + rnd.Next(4) + 1) % 5;
+                }
+
+                edgeworkScreens[rndNumber] = true;
+            }
+
+            for (int i = 0; i < 5; i++)
+            {
+                if (edgeworkScreens[i])
+                {
+                    edgeworkScreenNumbers[arrayPos] = i;
+                    arrayPos++;
+                }
+
+                else
+                {
+                    notEdgeworkScreenNumbers[notArrayPos] = i;
+                    notArrayPos++;
+                }
+            }
+            
+
+            for (int i = 0; i < 6; i++)
+            {
+                if (i != 5)
+                {
+                    rulesUsed[i] = rnd.Next(48);
+                }
+                
+                answersUsed[i, 0] = rnd.Next(4);
+
+                if (answersUsed[i, 0] == 3)
+                {
+                    answersUsed[i, 1] = edgeworkScreenNumbers[rnd.Next(2)];
+                }
+
+                else
+                {
+                    answersUsed[i, 1] = notEdgeworkScreenNumbers[rnd.Next(3)];
+                }
+                
+                answersUsed[i, 2] = notEdgeworkScreenNumbers[rnd.Next(3)];
+
+                if (answersUsed[i, 1] == answersUsed[i, 2])
+                {
+                    answersUsed[i, 1] = (answersUsed[i, 1] + 1) % 3;
+                }
+                    
+                answersUsed[i, 3] = notEdgeworkScreenNumbers[rnd.Next(3)];
+            }
+        }
+
         // Makes the first screen light green
 
         screenButtons[0].material.color = new Color32(0, 255, 0, 255);
@@ -76,559 +162,20 @@ public class instructionsScript : MonoBehaviour {
         screenButtons[3].material.color = new Color32(0, 0, 0, 255);
         screenButtons[4].material.color = new Color32(0, 0, 0, 255);
 
-        // Screen generation
+        GenerateEdgework();
+        GenerateButtons();
+        GenerateScreens();
 
-        screen1 = Random.Range(0, 10);
-
-        screen2 = Random.Range(0, 12);
-
-        screen3 = Random.Range(0, 10);
-
-        // Prevents duplicates
-        if (screen3 == screen1)
-        {
-            if (screen3 == 9)
-            {
-                screen3 = 1;
-            }
-
-            else
-            {
-                screen3++;
-            }
-        }
-
-        screen4 = Random.Range(0, 12);
-
-        if (screen2 == screen4)
-        {
-            if (screen4 == 11)
-            {
-                screen4 = 0;
-            }
-
-            else
-            {
-                screen4++;
-            }
-        }
-
-        screen5 = Random.Range(0, 10);
-
-        for (int i = 0; i < 4; i++)
-        {
-            if (screen2 == screen5 || screen4 == screen5)
-            {
-                if (screen5 == 11)
-                {
-                    screen5 = 0;
-                }
-
-                else
-                {
-                    screen5++;
-                }
-            }
-        }
-
-        // Puts the first word on the screen
-
-        screen.text = screens13[screen1];
-
-        Debug.LogFormat("[Instructions #{0}] The first screen says {1}.", _moduleID, screens13[screen1].Replace("\n", " "));
-        Debug.LogFormat("[Instructions #{0}] The second screen says {1}.", _moduleID, screens245[screen2].Replace("\n", " "));
-        Debug.LogFormat("[Instructions #{0}] The third screen says {1}.", _moduleID, screens13[screen3].Replace("\n", " "));
-        Debug.LogFormat("[Instructions #{0}] The fourth screen says {1}.", _moduleID, screens245[screen4].Replace("\n", " "));
-        Debug.LogFormat("[Instructions #{0}] The fifth screen says {1}.", _moduleID, screens245[screen5].Replace("\n", " "));
-
-        // Edgework gets added to the edgework array
-
-        edgework[0] = Info.GetBatteryCount();
-        edgework[1] = Info.GetBatteryHolderCount();
-        edgework[5] = Info.GetPortCount();
-        edgework[6] = Info.GetPortPlateCount();
-        edgework[9] = Info.GetModuleNames().Count;
-
-        // Scripts to count indicators, letters and digits
-        foreach (var x in Info.GetIndicators())
-        {
-            counter++;
-        }
-        edgework[2] = counter;
-
-        counter = 0;
-        foreach (var x in Info.GetOnIndicators())
-        {
-            counter++;
-        }
-        edgework[3] = counter;
-
-        counter = 0;
-        foreach (var x in Info.GetOffIndicators())
-        {
-            counter++;
-        }
-        edgework[4] = counter;
-
-        counter = 0;
-        foreach (var x in Info.GetSerialNumberNumbers())
-        {
-            counter++;
-        }
-        edgework[7] = counter;
-
-        counter = 0;
-        foreach (var x in Info.GetSerialNumberLetters())
-        {
-            counter++;
-        }
-        edgework[8] = counter;
-        
-
-        // For screens 1 and 3, possible words are: BATTERIES, BATTERY HOLDERS, INDICATORS, LIT INDICATORS, UNLIT INDICATORS, PORTS, PORT PLATES, DIGITS IN SERIAL NUMBER, LETTERS IN SERIAL NUMBER, MODULES.
-        // For screens 2, 4, and 5, possible words are: RED, GREEN, YELLOW, BLUE, A, B, C, D, FIRST, SECOND, THIRD, FOURTH.
-        
-        // Button color generation
-
-        buttonOneColor = Random.Range(0, 4);
-        
-        // 0 = Red, 1 = Green, 2 = Yellow, 3 = Blue
-
-        if (buttonOneColor == 0)
-        {
-            buttonOne.material.color = new Color32(255, 0, 0, 255);
-            buttonOneColorString = "red";
-        }
-        else if (buttonOneColor == 1)
-        {
-            buttonOne.material.color = new Color32(0, 255, 0, 255);
-            buttonOneColorString = "green";
-        }
-        else if (buttonOneColor == 2)
-        {
-            buttonOne.material.color = new Color32(200, 200, 0, 255);
-            buttonOneColorString = "yellow";
-        }
-        else
-        {
-            buttonOne.material.color = new Color32(0, 0, 255, 255);
-            buttonOneColorString = "blue";
-        }
-
-        buttonTwoColor = Random.Range(0, 4);
-
-        for (int i = 0; i < 4; i++)
-        {
-            if (buttonTwoColor == buttonOneColor)
-            {
-                if (buttonTwoColor == 3)
-                {
-                    buttonTwoColor = 0;
-                }
-                else
-                {
-                    buttonTwoColor++;
-                }
-            }
-        }
+        GenerateAnswer();
+    }
     
-
-        if (buttonTwoColor == 0)
-        {
-            buttonTwo.material.color = new Color32(255, 0, 0, 255);
-            buttonTwoColorString = "red";
-        }
-        else if (buttonTwoColor == 1)
-        {
-            buttonTwo.material.color = new Color32(0, 255, 0, 255);
-            buttonTwoColorString = "green";
-        }
-        else if (buttonTwoColor == 2)
-        {
-            buttonTwo.material.color = new Color32(200, 200, 0, 255);
-            buttonTwoColorString = "yellow";
-        }
-        else
-        {
-            buttonTwo.material.color = new Color32(0, 0, 255, 255);
-            buttonTwoColorString = "blue";
-        }
-
-        buttonThreeColor = Random.Range(0, 4);
-
-        for (int i = 0; i< 4; i++)
-        {
-            if (buttonThreeColor == buttonOneColor || buttonThreeColor == buttonTwoColor)
-            {
-                if (buttonThreeColor == 3)
-                {
-                    buttonThreeColor = 0;
-                }
-                else
-                {
-                    buttonThreeColor++;
-                }
-            }
-        }
-
-        if (buttonThreeColor == 0)
-        {
-            buttonThree.material.color = new Color32(255, 0, 0, 255);
-            buttonThreeColorString = "red";
-        }
-        else if (buttonThreeColor == 1)
-        {
-            buttonThree.material.color = new Color32(0, 255, 0, 255);
-            buttonThreeColorString = "green";
-        }
-        else if (buttonThreeColor == 2)
-        {
-            buttonThree.material.color = new Color32(200, 200, 0, 255);
-            buttonThreeColorString = "yellow";
-        }
-        else
-        {
-            buttonThree.material.color = new Color32(0, 0, 255, 255);
-            buttonThreeColorString = "blue";
-        }
-
-        buttonFourColor = Random.Range(0, 4);
-
-        for (int i = 0; i < 4; i++)
-        {
-            if (buttonFourColor == buttonOneColor || buttonFourColor == buttonTwoColor || buttonFourColor == buttonThreeColor)
-            {
-                if (buttonFourColor == 3)
-                {
-                    buttonFourColor = 0;
-                }
-                else
-                {
-                    buttonFourColor++;
-                }
-            }
-        }
-
-        if (buttonFourColor == 0)
-        {
-            buttonFour.material.color = new Color32(255, 0, 0, 255);
-            buttonFourColorString = "red";
-        }
-        else if (buttonFourColor == 1)
-        {
-            buttonFour.material.color = new Color32(0, 255, 0, 255);
-            buttonFourColorString = "green";
-        }
-        else if (buttonFourColor == 2)
-        {
-            buttonFour.material.color = new Color32(200, 200, 0, 255);
-            buttonFourColorString = "yellow";
-        }
-        else
-        {
-            buttonFour.material.color = new Color32(0, 0, 255, 255);
-            buttonFourColorString = "blue";
-        }
-
-        Debug.LogFormat("[Instructions #{0}] The buttons, in reading order, are {1}, {2}, {3}, and {4}.", 
-            _moduleID, buttonOneColorString, buttonTwoColorString, buttonThreeColorString, buttonFourColorString);
-
-        // Button label generation
-
-        randomLabel1 = Random.Range(0, 4);
-
-        label1.text = labels[randomLabel1];
-
-        randomLabel2 = Random.Range(0, 4);
-
-        for (int i = 0; i < 4; i++)
-        {
-            if (randomLabel2 == randomLabel1)
-            {
-                if (randomLabel2 == 3)
-                {
-                    randomLabel2 = 0;
-                }
-                else
-                {
-                    randomLabel2++;
-                }
-            }
-        }
-
-        label2.text = labels[randomLabel2];
-
-        randomLabel3 = Random.Range(0, 4);
-
-        for (int i = 0; i < 4; i++)
-        {
-            if (randomLabel3 == randomLabel1 || randomLabel3 == randomLabel2)
-            {
-                if (randomLabel3 == 3)
-                {
-                    randomLabel3 = 0;
-                }
-                else
-                {
-                    randomLabel3++;
-                }
-            }
-        }
-
-        label3.text = labels[randomLabel3];
-
-        randomLabel4 = Random.Range(0, 4);
-
-        for (int i = 0; i < 4; i++)
-        {
-            if (randomLabel4 == randomLabel1 || randomLabel4 == randomLabel2 || randomLabel4 == randomLabel3)
-            {
-                if (randomLabel4 == 3)
-                {
-                    randomLabel4 = 0;
-                }
-                else
-                {
-                    randomLabel4++;
-                }
-            }
-        }
-
-        label4.text = labels[randomLabel4];
-
-        Debug.LogFormat("[Instructions #{0}] The button labels, in reading order, are {1}, {2}, {3}, and {4}.", 
-            _moduleID, labels[randomLabel1], labels[randomLabel2], labels[randomLabel3], labels[randomLabel4]);
-        
-        // Calculate correct answer
-
-        // Calculating what the positions for the buttons for screens 2, 4, and 5 are
-
-        // If screen 2 is a color
-        if (screen2 < 4)
-        {
-            if (buttonOneColor == screen2)
-            {
-                screen2Position = 1;
-            }
-
-            else if (buttonTwoColor == screen2)
-            {
-                screen2Position = 2;
-            }
-
-            else if (buttonThreeColor == screen2)
-            {
-                screen2Position = 3;
-            }
-
-            else
-            {
-                screen2Position = 4;
-            }
-        }
-
-        // If screen 2 is a letter
-        else if (screen2 > 3 && screen2 < 8)
-        {
-            if (randomLabel1 == screen2 - 4)
-            {
-                screen2Position = 1;
-            }
-
-            else if (randomLabel2 == screen2 - 4)
-            {
-                screen2Position = 2;
-            }
-
-            else if (randomLabel3 == screen2 - 4)
-            {
-                screen2Position = 3;
-            }
-
-            else
-            {
-                screen2Position = 4;
-            }
-        }
-
-        // If screen 2 is a position
-        else
-        {
-            screen2Position = screen2 - 7;
-        }
-
-        // If screen 4 is a color
-        if (screen4 < 4)
-        {
-            if (buttonOneColor == screen4)
-            {
-                screen4Position = 1;
-            }
-
-            else if (buttonTwoColor == screen4)
-            {
-                screen4Position = 2;
-            }
-
-            else if (buttonThreeColor == screen4)
-            {
-                screen4Position = 3;
-            }
-
-            else
-            {
-                screen4Position = 4;
-            }
-        }
-
-        // If screen 4 is a letter
-        else if (screen4 > 3 && screen4 < 8)
-        {
-            if (randomLabel1 == screen4 - 4)
-            {
-                screen4Position = 1;
-            }
-
-            else if (randomLabel2 == screen4 - 4)
-            {
-                screen4Position = 2;
-            }
-
-            else if (randomLabel3 == screen4 - 4)
-            {
-                screen4Position = 3;
-            }
-
-            else
-            {
-                screen4Position = 4;
-            }
-        }
-
-        // If screen 4 is a position
-        else
-        {
-            screen4Position = screen4 - 7;
-        }
-
-        // If screen 5 is a color
-        if (screen5 < 4)
-        {
-            if (buttonOneColor == screen5)
-            {
-                screen5Position = 1;
-            }
-
-            else if (buttonTwoColor == screen5)
-            {
-                screen5Position = 2;
-            }
-
-            else if (buttonThreeColor == screen5)
-            {
-                screen5Position = 3;
-            }
-
-            else
-            {
-                screen5Position = 4;
-            }
-        }
-
-        // If screen 5 is a letter
-        else if (screen5 > 3 && screen5 < 8)
-        {
-            if (randomLabel1 == screen5 - 4)
-            {
-                screen5Position = 1;
-            }
-
-            else if (randomLabel2 == screen5 - 4)
-            {
-                screen5Position = 2;
-            }
-
-            else if (randomLabel3 == screen5 - 4)
-            {
-                screen5Position = 3;
-            }
-
-            else
-            {
-                screen5Position = 4;
-            }
-        }
-
-        // If screen 5 is a position
-        else
-        {
-            screen5Position = screen5 - 7;
-        }
-
-        if (edgework[screen1] == 0)
-        {
-            if (screen5Position > screen2Position)
-            {
-                correctBtn = screen5Position;
-            }
-
-            else if (screen2Position > screen5Position)
-            {
-                correctBtn = screen2Position;
-            }
-
-            else
-            {
-                correctBtn = screen4Position;
-            }
-        }
-
-        else if (edgework[screen1] < edgework[screen3])
-        {
-            correctBtn = screen2Position;
-        }
-
-        else if (screen2Position < screen4Position)
-        {
-            correctBtn = screen5Position;
-        }
-
-        else if (edgework[screen3] > 3)
-        {
-            correctBtn = (edgework[screen1] % 4) + 1;
-        }
-
-        else if (screen2Position != screen4Position)
-        {
-            if (screen2Position != screen4Position && screen4Position != screen5Position && screen2Position != screen5Position)
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    if (i != screen2Position && i != screen4Position && i != screen5Position)
-                    {
-                        correctBtn = i;
-                    }
-                }
-            }
-        }
-
-        else
-        {
-            correctBtn = screen4Position;
-        }
-
-        Debug.LogFormat("[Instructions #{0}] The correct button to press is button {1}.", _moduleID, correctBtn);
-        
-}
-
-    // Handling button presses
-    // Buttons are numbered 0-3 in reading order, but gets changed to 1-4 in that if statement.
-
     void ButtonPressed(int btnNumber)
     {
+        Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, Module.transform);
+
         if (!_lightsOn || _solved) return;
 
-        if (btnNumber + 1 == correctBtn)
+        if (btnNumber == correctBtn)
         {
             _solved = true;
 
@@ -641,7 +188,7 @@ public class instructionsScript : MonoBehaviour {
             for (int i = 0; i < 5; i++)
             {
                 screenButtons[i].material.color = new Color32(0, 255, 0, 255);
-                screen.text = solveMessages[Random.Range(0,11)];
+                screen.text = solveMessages[Random.Range(0, 12)];
             }
         }
 
@@ -651,13 +198,13 @@ public class instructionsScript : MonoBehaviour {
 
             Debug.LogFormat("[Instructions #{0}] Button {1} was pressed. Strike.", _moduleID, btnNumber + 1);
 
-            StartCoroutine("test");
+            StartCoroutine("StrikeAnimation");
         }
     }
 
-    IEnumerator test()
+    IEnumerator StrikeAnimation()
     {
-        screen.text = failureMessages[Random.Range(0, 11)];
+        screen.text = failureMessages[Random.Range(0, 12)];
 
         for (int i = 0; i < 5; i++)
         {
@@ -679,7 +226,6 @@ public class instructionsScript : MonoBehaviour {
 
     void ScreenButtonPressed(int btnNumber)
     {
-
         if (!_lightsOn || _solved) return;
 
         for (int i = 0; i < 5; i++)
@@ -689,29 +235,14 @@ public class instructionsScript : MonoBehaviour {
 
         screenButtons[btnNumber].material.color = new Color32(0, 255, 0, 255);
 
-        if (btnNumber == 0)
+        if (edgeworkScreens[btnNumber])
         {
-            screen.text = screens13[screen1];
-        }
-
-        else if (btnNumber == 1)
-        {
-            screen.text = screens245[screen2];
-        }
-
-        else if (btnNumber == 2)
-        {
-            screen.text = screens13[screen3];
-        }
-
-        else if (btnNumber == 3)
-        {
-            screen.text = screens245[screen4];
+            screen.text = edgeworkPossibilities[screens[btnNumber, 0]];
         }
 
         else
         {
-            screen.text = screens245[screen5];
+            screen.text = buttonPossibilities[screens[btnNumber, 0]];
         }
     }
 
@@ -764,4 +295,486 @@ public class instructionsScript : MonoBehaviour {
         }
     }
     
+    void GenerateAnswer()
+    {
+        int correctRule = 5;
+
+        // the below uses a KMBombInfo and i'm too lazy to change it. it works just fine ok
+        var rules = new Func<KMBombInfo, bool>[]
+        {
+            x => screens[edgeworkScreenNumbers[0], 1] == 0,
+            x => screens[edgeworkScreenNumbers[0], 1] == 1,
+            x => screens[edgeworkScreenNumbers[0], 1] == 2,
+            x => screens[edgeworkScreenNumbers[0], 1] == 3,
+            x => screens[edgeworkScreenNumbers[0], 1] == 4,
+            x => screens[edgeworkScreenNumbers[0], 1] == 5,
+            x => screens[edgeworkScreenNumbers[1], 1] == 0,
+            x => screens[edgeworkScreenNumbers[1], 1] == 1,
+            x => screens[edgeworkScreenNumbers[1], 1] == 2,
+            x => screens[edgeworkScreenNumbers[1], 1] == 3,
+            x => screens[edgeworkScreenNumbers[1], 1] == 4,
+            x => screens[edgeworkScreenNumbers[1], 1] == 5,
+            x => screens[edgeworkScreenNumbers[0], 1] > 0,
+            x => screens[edgeworkScreenNumbers[0], 1] > 1,
+            x => screens[edgeworkScreenNumbers[0], 1] > 2,
+            x => screens[edgeworkScreenNumbers[0], 1] > 3,
+            x => screens[edgeworkScreenNumbers[0], 1] > 4,
+            x => screens[edgeworkScreenNumbers[0], 1] > 5,
+            x => screens[edgeworkScreenNumbers[1], 1] > 0,
+            x => screens[edgeworkScreenNumbers[1], 1] > 1,
+            x => screens[edgeworkScreenNumbers[1], 1] > 2,
+            x => screens[edgeworkScreenNumbers[1], 1] > 3,
+            x => screens[edgeworkScreenNumbers[1], 1] > 4,
+            x => screens[edgeworkScreenNumbers[1], 1] > 5,
+            x => screens[edgeworkScreenNumbers[0], 1] < 0,
+            x => screens[edgeworkScreenNumbers[0], 1] < 1,
+            x => screens[edgeworkScreenNumbers[0], 1] < 2,
+            x => screens[edgeworkScreenNumbers[0], 1] < 3,
+            x => screens[edgeworkScreenNumbers[0], 1] < 4,
+            x => screens[edgeworkScreenNumbers[0], 1] < 5,
+            x => screens[edgeworkScreenNumbers[1], 1] < 0,
+            x => screens[edgeworkScreenNumbers[1], 1] < 1,
+            x => screens[edgeworkScreenNumbers[1], 1] < 2,
+            x => screens[edgeworkScreenNumbers[1], 1] < 3,
+            x => screens[edgeworkScreenNumbers[1], 1] < 4,
+            x => screens[edgeworkScreenNumbers[1], 1] < 5,
+            x => screens[edgeworkScreenNumbers[0], 1] == screens[edgeworkScreenNumbers[1], 1],
+            x => screens[edgeworkScreenNumbers[0], 1] > screens[edgeworkScreenNumbers[1], 1],
+            x => screens[edgeworkScreenNumbers[0], 1] < screens[edgeworkScreenNumbers[1], 1],
+
+            x => screens[notEdgeworkScreenNumbers[0], 1] == screens[notEdgeworkScreenNumbers[1], 1],
+            x => screens[notEdgeworkScreenNumbers[1], 1] == screens[notEdgeworkScreenNumbers[2], 1],
+            x => screens[notEdgeworkScreenNumbers[2], 1] == screens[notEdgeworkScreenNumbers[0], 1],
+            x => screens[notEdgeworkScreenNumbers[0], 1] > screens[notEdgeworkScreenNumbers[1], 1],
+            x => screens[notEdgeworkScreenNumbers[1], 1] > screens[notEdgeworkScreenNumbers[2], 1],
+            x => screens[notEdgeworkScreenNumbers[2], 1] > screens[notEdgeworkScreenNumbers[0], 1],
+            x => screens[notEdgeworkScreenNumbers[0], 1] < screens[notEdgeworkScreenNumbers[1], 1],
+            x => screens[notEdgeworkScreenNumbers[1], 1] < screens[notEdgeworkScreenNumbers[2], 1],
+            x => screens[notEdgeworkScreenNumbers[2], 1] < screens[notEdgeworkScreenNumbers[0], 1],
+
+            x => screens[notEdgeworkScreenNumbers[0], 1] != screens[notEdgeworkScreenNumbers[1], 1] && screens[notEdgeworkScreenNumbers[0], 1] != screens[notEdgeworkScreenNumbers[2], 1]
+            && screens[notEdgeworkScreenNumbers[1], 1] != screens[notEdgeworkScreenNumbers[2], 1],
+        };
+
+        for (int ruleNum = 0; ruleNum < 5; ruleNum++)
+        {
+            if (rules[rulesUsed[ruleNum]](Info))
+            {
+                Debug.LogFormat("[Instructions #{0}] Rule {1} applied.", _moduleID, ruleNum + 1);
+                correctRule = ruleNum;
+                break;
+            }
+        }
+
+        if (correctRule == 5)
+        {
+            Debug.LogFormat("[Instructions #{0}] Rule 6 applied.", _moduleID);
+        }
+
+        if (answersUsed[correctRule, 0] == 0)
+        {
+            correctBtn = screens[answersUsed[correctRule, 1], 1];
+        }
+
+        else if (answersUsed[correctRule, 0] == 1)
+        {
+            if (answersUsed[correctRule, 1] > answersUsed[correctRule, 2])
+            {
+                correctBtn = screens[answersUsed[correctRule, 2], 1];
+            }
+
+            else if (answersUsed[correctRule, 1] < answersUsed[correctRule, 2])
+            {
+                correctBtn = screens[answersUsed[correctRule, 1], 1];
+            }
+
+            else
+            {
+                correctBtn = screens[answersUsed[correctRule, 3], 1];
+            }
+        }
+
+        else if (answersUsed[correctRule, 0] == 2)
+        {
+            if (answersUsed[correctRule, 1] > answersUsed[correctRule, 2])
+            {
+                correctBtn = screens[answersUsed[correctRule, 1], 1];
+            }
+
+            else if (answersUsed[correctRule, 1] < answersUsed[correctRule, 2])
+            {
+                correctBtn = screens[answersUsed[correctRule, 2], 1];
+            }
+
+            else
+            {
+                correctBtn = screens[answersUsed[correctRule, 3], 1];
+            }
+        }
+
+        else if (answersUsed[correctRule, 0] == 3)
+        {
+            correctBtn = screens[answersUsed[correctRule, 1], 1] % 4;
+        }
+
+        else
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                if (screens[notEdgeworkScreenNumbers[0], 1] != i && screens[notEdgeworkScreenNumbers[1], 1] != i && screens[notEdgeworkScreenNumbers[2], 1] != i)
+                {
+                    correctBtn = i;
+                    break;
+                }
+            }
+        }
+
+        Debug.LogFormat("[Instructions #{0}] Press button {1}.", _moduleID, correctBtn + 1);
+    }
+
+    void GenerateScreens()
+    {
+        // For the edgework screens, possible words are: BATTERIES, BATTERY HOLDERS, INDICATORS, LIT INDICATORS, UNLIT INDICATORS, PORTS, PORT PLATES, DIGITS IN SERIAL NUMBER, LETTERS IN SERIAL NUMBER, MODULES.
+        // For the button screens, possible words are: RED, GREEN, YELLOW, BLUE, A, B, C, D, FIRST, SECOND, THIRD, FOURTH.
+
+        for (int screenNum = 0; screenNum < 5; screenNum++)
+        {
+            screens[screenNum, 0] = 99;
+        }
+
+        for (int screenNum = 0; screenNum < 5; screenNum++)
+        {
+
+            if (edgeworkScreens[screenNum])
+            {
+                screens[screenNum, 0] = Random.Range(0, 10);
+
+                for (int i = 0; i < 5; i++)
+                {
+                    if (screens[i, 0] == screens[screenNum, 0] && screenNum != i)
+                    {
+                        screens[screenNum, 0] = (screens[screenNum, 0] + 1) % 10;
+                    }
+                }
+            }
+
+            else
+            {
+                screens[screenNum, 0] = Random.Range(0, 10);
+
+                for (int x = 0; x < 2; x++)
+                {
+                    for (int i = 0; i < 5; i++)
+                    {
+                        if (screens[i, 0] == screens[screenNum, 0] && screenNum != i)
+                        {
+                            screens[screenNum, 0] = (screens[screenNum, 0] + 1) % 10;
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int screenNum = 0; screenNum < 5; screenNum++)
+        {
+            if (edgeworkScreens[screenNum])
+            {
+                screens[screenNum, 1] = edgework[screens[screenNum, 0]];
+            }
+
+            else
+            {
+                if (screens[screenNum, 0] < 4)
+                {
+                    screens[screenNum, 1] = screens[screenNum, 0];
+                }
+
+                else if (screens[screenNum, 0] < 8)
+                {
+                    screens[screenNum, 1] = screens[screenNum, 0];
+                }
+            }
+        }
+
+        screen.text = edgeworkPossibilities[screens[0, 0]];
+        
+        for (int i = 0; i < 5; i++)
+        {
+            if (edgeworkScreens[i])
+            {
+                Debug.LogFormat("[Instructions #{0}] Screen {1} says {2}.", _moduleID, i + 1, edgeworkPossibilities[screens[i, 0]]);
+            }
+
+            else
+            {
+                Debug.LogFormat("[Instructions #{0}] Screen {1} says {2}.", _moduleID, i + 1, buttonPossibilities[screens[i, 0]]);
+            }
+        }
+
+        // Generate values
+
+        for (int i = 0; i < 5; i++)
+        {
+            if (edgeworkScreens[i])
+            {
+                screens[i, 1] = edgework[screens[i, 0]];
+            }
+
+            else
+            {
+                if (screens[i, 0] < 4)
+                {
+                    int btnNumber = 0;
+
+                    for (int x = 0; x < 4; x++)
+                    {
+                        if (buttonTypes[x, 0] == screens[i, 1])
+                        {
+                            btnNumber = x;
+                            break;
+                        }
+                    }
+
+                    screens[i, 1] = btnNumber;
+                }
+
+                else if (screens[i, 0] < 8)
+                {
+                    int btnNumber = 0;
+
+                    for (int x = 0; x < 4; x++)
+                    {
+                        if (buttonTypes[x, 1] == screens[i, 1] - 4)
+                        {
+                            btnNumber = x;
+                            break;
+                        }
+                    }
+
+                    screens[i, 1] = btnNumber;
+                }
+
+                else
+                {
+                    screens[i, 1] = screens[i, 0] - 8;
+                }
+            }
+        }
+    }
+
+    void GenerateButtons()
+    {
+        // Button color generation
+
+        for (int i = 0; i < 4; i++)
+        {
+            buttonTypes[i, 0] = Random.Range(0, 4);
+        }
+
+        // 0 = Red, 1 = Green, 2 = Yellow, 3 = Blue
+
+        if (buttonTypes[0, 0] == 0)
+        {
+            buttonOne.material.color = new Color32(255, 0, 0, 255);
+        }
+        else if (buttonTypes[0, 0] == 1)
+        {
+            buttonOne.material.color = new Color32(0, 255, 0, 255);
+        }
+        else if (buttonTypes[0, 0] == 2)
+        {
+            buttonOne.material.color = new Color32(200, 200, 0, 255);
+        }
+        else
+        {
+            buttonOne.material.color = new Color32(0, 0, 255, 255);
+        }
+
+        if (buttonTypes[1, 0] == buttonTypes[0, 0])
+        {
+            buttonTypes[1, 0] = (buttonTypes[1, 0] + 1) % 4;
+        }
+
+        if (buttonTypes[1, 0] == 0)
+        {
+            buttonTwo.material.color = new Color32(255, 0, 0, 255);
+        }
+        else if (buttonTypes[1, 0] == 1)
+        {
+            buttonTwo.material.color = new Color32(0, 255, 0, 255);
+        }
+        else if (buttonTypes[1, 0] == 2)
+        {
+            buttonTwo.material.color = new Color32(200, 200, 0, 255);
+        }
+        else
+        {
+            buttonTwo.material.color = new Color32(0, 0, 255, 255);
+        }
+
+        for (int i = 0; i < 2; i++)
+        {
+            if (buttonTypes[2, 0] == buttonTypes[0, 0] || buttonTypes[2, 0] == buttonTypes[1, 0])
+            {
+                buttonTypes[2, 0] = (buttonTypes[2, 0] + 1) % 4;
+            }
+        }
+
+        if (buttonTypes[2, 0] == 0)
+        {
+            buttonThree.material.color = new Color32(255, 0, 0, 255);
+        }
+        else if (buttonTypes[2, 0] == 1)
+        {
+            buttonThree.material.color = new Color32(0, 255, 0, 255);
+        }
+        else if (buttonTypes[2, 0] == 2)
+        {
+            buttonThree.material.color = new Color32(200, 200, 0, 255);
+        }
+        else
+        {
+            buttonThree.material.color = new Color32(0, 0, 255, 255);
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (buttonTypes[3, 0] == buttonTypes[0, 0] || buttonTypes[3, 0] == buttonTypes[1, 0] || buttonTypes[3, 0] == buttonTypes[2, 0])
+            {
+                buttonTypes[3, 0] = (buttonTypes[3, 0] + 1) % 4;
+            }
+        }
+
+        if (buttonTypes[3, 0] == 0)
+        {
+            buttonFour.material.color = new Color32(255, 0, 0, 255);
+        }
+        else if (buttonTypes[3, 0] == 1)
+        {
+            buttonFour.material.color = new Color32(0, 255, 0, 255);
+        }
+        else if (buttonTypes[3, 0] == 2)
+        {
+            buttonFour.material.color = new Color32(200, 200, 0, 255);
+        }
+        else
+        {
+            buttonFour.material.color = new Color32(0, 0, 255, 255);
+        }
+
+        Debug.LogFormat("[Instructions #{0}] The buttons, in reading order, are {1}, {2}, {3}, and {4}.",
+            _moduleID, buttonPossibilities[buttonTypes[0, 0]], buttonPossibilities[buttonTypes[1, 0]], buttonPossibilities[buttonTypes[2, 0]], buttonPossibilities[buttonTypes[3, 0]]);
+
+        // Button label generation
+
+        buttonTypes[0, 1] = Random.Range(0, 4);
+
+        label1.text = labels[buttonTypes[0, 1]];
+
+        buttonTypes[1, 1] = Random.Range(0, 4);
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (buttonTypes[1, 1] == buttonTypes[0, 1])
+            {
+                if (buttonTypes[1, 1] == 3)
+                {
+                    buttonTypes[1, 1] = 0;
+                }
+                else
+                {
+                    buttonTypes[1, 1]++;
+                }
+            }
+        }
+
+        label2.text = labels[buttonTypes[1, 1]];
+
+        buttonTypes[2, 1] = Random.Range(0, 4);
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (buttonTypes[2, 1] == buttonTypes[0, 1] || buttonTypes[2, 1] == buttonTypes[1, 1])
+            {
+                if (buttonTypes[2, 1] == 3)
+                {
+                    buttonTypes[2, 1] = 0;
+                }
+                else
+                {
+                    buttonTypes[2, 1]++;
+                }
+            }
+        }
+
+        label3.text = labels[buttonTypes[2, 1]];
+
+        buttonTypes[3, 1] = Random.Range(0, 4);
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (buttonTypes[3, 1] == buttonTypes[0, 1] || buttonTypes[3, 1] == buttonTypes[1, 1] || buttonTypes[3, 1] == buttonTypes[2, 1])
+            {
+                if (buttonTypes[3, 1] == 3)
+                {
+                    buttonTypes[3, 1] = 0;
+                }
+                else
+                {
+                    buttonTypes[3, 1]++;
+                }
+            }
+        }
+
+        label4.text = labels[buttonTypes[3, 1]];
+
+        Debug.LogFormat("[Instructions #{0}] The button labels, in reading order, are {1}, {2}, {3}, and {4}.",
+            _moduleID, labels[buttonTypes[0, 1]], labels[buttonTypes[1, 1]], labels[buttonTypes[2, 1]], labels[buttonTypes[3, 1]]);
+    }
+
+    void GenerateEdgework()
+    {
+        // Edgework gets added to the edgework array
+
+        edgework[0] = Info.GetBatteryCount();
+        edgework[1] = Info.GetBatteryHolderCount();
+        edgework[5] = Info.GetPortCount();
+        edgework[6] = Info.GetPortPlateCount();
+        edgework[9] = Info.GetModuleNames().Count;
+
+        // Scripts to count indicators, letters and digits
+        foreach (var x in Info.GetIndicators())
+        {
+            counter++;
+        }
+        edgework[2] = counter;
+
+        counter = 0;
+        foreach (var x in Info.GetOnIndicators())
+        {
+            counter++;
+        }
+        edgework[3] = counter;
+
+        counter = 0;
+        foreach (var x in Info.GetOffIndicators())
+        {
+            counter++;
+        }
+        edgework[4] = counter;
+
+        counter = 0;
+        foreach (var x in Info.GetSerialNumberNumbers())
+        {
+            counter++;
+        }
+        edgework[7] = counter;
+
+        counter = 0;
+        foreach (var x in Info.GetSerialNumberLetters())
+        {
+            counter++;
+        }
+        edgework[8] = counter;
+    }
 }
