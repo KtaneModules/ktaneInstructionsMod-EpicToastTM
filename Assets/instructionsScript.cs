@@ -28,9 +28,9 @@ public class instructionsScript : MonoBehaviour {
     private string[] labels = { "A", "B", "C", "D" };
     private int correctBtn;
     private int[] edgework = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD", "OH CRAP, THE TEXT\nGOES OFF THE SCREEN", "E", "OH SHOOT\nIT'S A BOMB", "HEY I'M YOUR\nFAVORITE MODULE,\nRIGHT?", "\n\n\n\n\n\n\n\n\n\n\n\nI'M DOWN HERE NOW", "CONGRATULATIONS\nYOU FOUND AN\nEASTER EGG", "ARE YOU GOING TO\nBLOW UP THIS\nBOMB?", "SUBSCRIBE TO\nPEWDIEPIE", "STOP READING THE GITHUB" };
-    private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED", "*INSERT CLAP\nEMOJI HERE*", "WOOOOOOOO!", "OH CRAP YOU\nACTUALLY DID IT", "THAT WAS NICE\nOWO", "+6 POINTS!", "AW MAN, NOW\nNOBODY CARES\nABOUT ME :(", ":OK_HAND:", "A WINNER IS YOU" };
-    private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS", "DEFINITELY NOT\nA BUG :)))))", "KABOOOOM!", ":(", "THIS IS SO SAD\nALEXA, PLAY\nDESPACITO", "BETTER CHECK\nTHE LOG!", "REVENGE!!!", "O\nO\nF", "YOU'RE DEAD TO\nME" };
+    private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD", "OH CRAP, THE TEXT\nGOES OFF THE SCREEN", "E", "OH SHOOT\nIT'S A BOMB", "HEY I'M YOUR\nFAVORITE MODULE,\nRIGHT?", "\n\n\n\n\n\n\n\n\n\n\n\nI'M DOWN HERE NOW", "CONGRATULATIONS\nYOU FOUND AN\nEASTER EGG", "ARE YOU GOING TO\nBLOW UP THIS\nBOMB?", "SUBSCRIBE TO\nPEWDIEPIE", "I'M GOING TO SAY\nTHE N WORD", "STOP READING THE GITHUB" };
+    private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED", "*INSERT CLAP\nEMOJI HERE*", "WOOOOOOOO!", "OH CRAP YOU\nACTUALLY DID IT", "THAT WAS NICE\nOWO", "+6 POINTS!", "AW MAN, NOW\nNOBODY CARES\nABOUT ME :(", ":OK_HAND:", "A WINNER IS YOU", "I'M SO PROUD\nOF YOU" };
+    private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS", "DEFINITELY NOT\nA BUG :)))))", "KABOOOOM!", ":(", "THIS IS SO SAD\nALEXA, PLAY\nDESPACITO", "BETTER CHECK\nTHE LOG!", "REVENGE!!!", "O\nO\nF", "YOU'RE DEAD TO\nME", "..." };
     private int[,] screens = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
     private bool[] edgeworkScreens = { true, false, true, false, false };
     private int[] edgeworkScreenNumbers = { 0, 2 };
@@ -46,7 +46,7 @@ public class instructionsScript : MonoBehaviour {
     void Start () {
         _moduleID = _moduleIDCounter++;
         Module.OnActivate += Activate;
-        screen.text = startingScreens[Random.Range(0, 13)];
+        screen.text = startingScreens[Random.Range(0, startingScreens.Length - 1)];
     }
 
     private void Awake()
@@ -57,6 +57,7 @@ public class instructionsScript : MonoBehaviour {
             buttons[i].OnInteract += delegate ()
             {
                 ButtonPressed(j);
+                buttons[i].AddInteractionPunch();
                 return false;
             };
         }
@@ -67,6 +68,7 @@ public class instructionsScript : MonoBehaviour {
             screenButtonSelectables[i].OnInteract += delegate ()
             {
                 ScreenButtonPressed(h);
+                screenButtonSelectables[i].AddInteractionPunch();
                 return false;
             };
         }
@@ -188,7 +190,7 @@ public class instructionsScript : MonoBehaviour {
             for (int i = 0; i < 5; i++)
             {
                 screenButtons[i].material.color = new Color32(0, 255, 0, 255);
-                screen.text = solveMessages[Random.Range(0, 13)];
+                screen.text = solveMessages[Random.Range(0, solveMessages.Length)];
             }
         }
 
@@ -204,7 +206,7 @@ public class instructionsScript : MonoBehaviour {
 
     IEnumerator StrikeAnimation()
     {
-        screen.text = failureMessages[Random.Range(0, 13)];
+        screen.text = failureMessages[Random.Range(0, failureMessages.Length)];
 
         for (int i = 0; i < 5; i++)
         {
