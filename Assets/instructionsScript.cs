@@ -3,6 +3,7 @@ using KMHelper;
 using System.Collections;
 using System;
 using Random = UnityEngine.Random;
+using System.Linq;
 
 public class instructionsScript : MonoBehaviour {
 
@@ -28,9 +29,9 @@ public class instructionsScript : MonoBehaviour {
     private string[] labels = { "A", "B", "C", "D" };
     private int correctBtn;
     private int[] edgework = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD", "OH CRAP, THE TEXT\nGOES OFF THE SCREEN", "E", "OH SHOOT\nIT'S A BOMB", "HEY I'M YOUR\nFAVORITE MODULE,\nRIGHT?", "\n\n\n\n\n\n\n\n\n\n\n\nI'M DOWN HERE NOW", "CONGRATULATIONS\nYOU FOUND AN\nEASTER EGG", "ARE YOU GOING TO\nBLOW UP THIS\nBOMB?", "SUBSCRIBE TO\nPEWDIEPIE", "I'M GOING TO SAY\nTHE N WORD", "CHALLENGE.\n3, 2, 1.", "*DOES DEFAULT\nDANCE*", "STOP READING THE GITHUB" };
-    private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED", "*INSERT CLAP\nEMOJI HERE*", "WOOOOOOOO!", "OH CRAP YOU\nACTUALLY DID IT", "THAT WAS NICE\nOWO", "+6 POINTS!", "AW MAN, NOW\nNOBODY CARES\nABOUT ME :(", ":OK_HAND:", "A WINNER IS YOU", "I'M SO PROUD\nOF YOU", "NEVER MIND, IT\nSOLVED ITSELF." };
-    private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS", "DEFINITELY NOT\nA BUG :)))))", "KABOOOOM!", ":(", "THIS IS SO SAD\nALEXA, PLAY\nDESPACITO", "BETTER CHECK\nTHE LOG!", "REVENGE!!!", "O\nO\nF", "YOU'RE DEAD TO\nME", "...", "YOU'VE VIOLATED AN\nAREA PROTECTED BY\nA SECURITY SYSTEM." };
+    private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD", "OH CRAP, THE TEXT\nGOES OFF THE SCREEN", "E", "OH SHOOT\nIT'S A BOMB", "HEY I'M YOUR\nFAVORITE MODULE,\nRIGHT?", "\n\n\n\n\n\n\n\n\n\n\n\nI'M DOWN HERE NOW", "CONGRATULATIONS\nYOU FOUND AN\nEASTER EGG", "ARE YOU GOING TO\nBLOW UP THIS\nBOMB?", "SUBSCRIBE TO\nPEWDIEPIE", "I'M GOING TO SAY\nTHE N WORD", "CHALLENGE.\n3, 2, 1.", "*DOES DEFAULT\nDANCE*", "IT'S TIME TO STOP", "STOP READING THE GITHUB" };
+    private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED", "*INSERT CLAP\nEMOJI HERE*", "WOOOOOOOO!", "OH CRAP YOU\nACTUALLY DID IT", "THAT WAS NICE\nOWO", "+6 POINTS!", "AW MAN, NOW\nNOBODY CARES\nABOUT ME :(", ":OK_HAND:", "A WINNER IS YOU", "I'M SO PROUD\nOF YOU", "NEVER MIND, IT\nSOLVED ITSELF.", "I'LL GET YOU NEXT\nTIME" };
+    private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS", "DEFINITELY NOT\nA BUG :)))))", "KABOOOOM!", ":(", "THIS IS SO SAD\nALEXA, PLAY\nDESPACITO", "BETTER CHECK\nTHE LOG!", "REVENGE!!!", "O\nO\nF", "YOU'RE DEAD TO\nME", "...", "YOU'VE VIOLATED AN\nAREA PROTECTED BY\nA SECURITY SYSTEM.", "OH NOOO" };
     private int[,] screens = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
     private bool[] edgeworkScreens = { true, false, true, false, false };
     private int[] edgeworkScreenNumbers = { 0, 2 };
@@ -446,23 +447,22 @@ public class instructionsScript : MonoBehaviour {
 
         for (int screenNum = 0; screenNum < 5; screenNum++)
         {
-
             if (edgeworkScreens[screenNum])
             {
-                screens[screenNum, 0] = Random.Range(0, 10);
+                screens[screenNum, 0] = Random.Range(0, edgeworkPossibilities.Length);
 
                 for (int i = 0; i < 5; i++)
                 {
                     if (screens[i, 0] == screens[screenNum, 0] && screenNum != i)
                     {
-                        screens[screenNum, 0] = (screens[screenNum, 0] + 1) % 10;
+                        screens[screenNum, 0] = (screens[screenNum, 0] + 1) % edgeworkPossibilities.Length;
                     }
                 }
             }
 
             else
             {
-                screens[screenNum, 0] = Random.Range(0, 10);
+                screens[screenNum, 0] = Random.Range(0, buttonPossibilities.Length);
 
                 for (int x = 0; x < 2; x++)
                 {
@@ -470,7 +470,7 @@ public class instructionsScript : MonoBehaviour {
                     {
                         if (screens[i, 0] == screens[screenNum, 0] && screenNum != i)
                         {
-                            screens[screenNum, 0] = (screens[screenNum, 0] + 1) % 10;
+                            screens[screenNum, 0] = (screens[screenNum, 0] + 1) % buttonPossibilities.Length;
                         }
                     }
                 }
@@ -504,12 +504,12 @@ public class instructionsScript : MonoBehaviour {
         {
             if (edgeworkScreens[i])
             {
-                Debug.LogFormat("[Instructions #{0}] Screen {1} says {2}.", _moduleID, i + 1, edgeworkPossibilities[screens[i, 0]]);
+                Debug.LogFormat("[Instructions #{0}] Screen {1} says {2}.", _moduleID, i + 1, edgeworkPossibilities[screens[i, 0]].Replace("\n"," "));
             }
 
             else
             {
-                Debug.LogFormat("[Instructions #{0}] Screen {1} says {2}.", _moduleID, i + 1, buttonPossibilities[screens[i, 0]]);
+                Debug.LogFormat("[Instructions #{0}] Screen {1} says {2}.", _moduleID, i + 1, buttonPossibilities[screens[i, 0]].Replace("\n", " "));
             }
         }
 
@@ -740,43 +740,13 @@ public class instructionsScript : MonoBehaviour {
 
         edgework[0] = Info.GetBatteryCount();
         edgework[1] = Info.GetBatteryHolderCount();
+        edgework[2] = Info.GetIndicators().Count();
+        edgework[3] = Info.GetOnIndicators().Count();
+        edgework[4] = Info.GetOffIndicators().Count();
         edgework[5] = Info.GetPortCount();
         edgework[6] = Info.GetPortPlateCount();
+        edgework[7] = Info.GetSerialNumberNumbers().Count();
+        edgework[8] = Info.GetSerialNumberLetters().Count();
         edgework[9] = Info.GetModuleNames().Count;
-
-        // Scripts to count indicators, letters and digits
-        foreach (var x in Info.GetIndicators())
-        {
-            counter++;
-        }
-        edgework[2] = counter;
-
-        counter = 0;
-        foreach (var x in Info.GetOnIndicators())
-        {
-            counter++;
-        }
-        edgework[3] = counter;
-
-        counter = 0;
-        foreach (var x in Info.GetOffIndicators())
-        {
-            counter++;
-        }
-        edgework[4] = counter;
-
-        counter = 0;
-        foreach (var x in Info.GetSerialNumberNumbers())
-        {
-            counter++;
-        }
-        edgework[7] = counter;
-
-        counter = 0;
-        foreach (var x in Info.GetSerialNumberLetters())
-        {
-            counter++;
-        }
-        edgework[8] = counter;
     }
 }
