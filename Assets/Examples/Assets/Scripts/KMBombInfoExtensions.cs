@@ -71,6 +71,9 @@ namespace KModkit
 
         public static string WidgetQueryTwofactor = "twofactor";
         public static string WidgetTwofactorKey = "twofactor_key";
+        public static string WidgetManufacture = "manufacture";
+        public static string WidgetDayOfWeek = "day";
+        public static string WidgetRandomTime = "time"
 
         private class IndicatorJSON
         {
@@ -94,6 +97,29 @@ namespace KModkit
         private class TwoFactorJSON
         {
             public int twofactor_key = 0;
+        }
+        
+        public class ManufactureJSON
+        {
+            public string month = null;
+            public string year = null;
+        }
+
+         public class DayJSON
+        {
+            public string day = null;
+            public string daycolor = null;
+            public int date = 0;
+            public int month = 0;
+            public bool colorenabled = false;
+            public int colormonth = 0;
+        }
+
+         public class TimeJSON
+        {
+            string time = null;
+            bool am = false;
+            bool pm = false;
         }
 
         private class BatteryJSON
@@ -152,6 +178,21 @@ namespace KModkit
         private static IEnumerable<TwoFactorJSON> GetTwoFactorEntries(KMBombInfo bombInfo)
         {
             return GetJSONEntries<TwoFactorJSON>(bombInfo, WidgetQueryTwofactor, null);
+        }
+        
+        private static IEnumerable<ManufactureJSON> GetManufactureEntries(KMBombInfo bombInfo)
+        {
+            return GetJSONEntries<ManufactureJSON>(bombInfo, WidgetManufacture, null);
+        }
+
+         private static IEnumerable<DayJSON> GetDayEntries(KMBombInfo bombInfo)
+        {
+            return GetJSONEntries<DayJSON>(bombInfo, WidgetDayOfWeek, null);
+        }
+
+         private static IEnumerable<TimeJSON> GetTimeEntries(KMBombInfo bombInfo)
+        {
+            return GetJSONEntries<TimeJSON>(bombInfo, WidgetRandomTime, null);
         }
 
         #endregion
@@ -418,6 +459,21 @@ namespace KModkit
         public static IEnumerable<int> GetTwoFactorCodes(this KMBombInfo bombInfo)
         {
             return GetTwoFactorEntries(bombInfo).Select((x) => x.twofactor_key);
+        }
+        
+        public static int GetManufactureCount(this KMBombInfo bombInfo)
+        {
+            return GetManufactureEntries(bombInfo).Count();
+        }
+
+         public static int GetDayCount(this KMBombInfo bombInfo)
+        {
+            return GetDayEntries(bombInfo).Count();
+        }
+
+         public static int GetTimeCount(this KMBombInfo bombInfo)
+        {
+            return GetTimeEntries(bombInfo).Count();
         }
         #endregion
     }
