@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using KMHelper;
+using KModkit;
 using System.Collections;
 using System;
 using Random = UnityEngine.Random;
@@ -10,7 +10,6 @@ public class instructionsScript : MonoBehaviour {
     public KMAudio Audio;
     public KMBombModule Module;
     public KMBombInfo Info;
-    public KMRuleSeedable Ruleseed;
     public KMSelectable[] buttons;
     public KMSelectable[] screenButtonSelectables;
     public MeshRenderer[] screenButtons;
@@ -24,25 +23,17 @@ public class instructionsScript : MonoBehaviour {
 
     private int counter;
     private string[] edgeworkPossibilities = { "BATTERIES", "BATTERY\nHOLDERS", "INDICATORS", "LIT INDICATORS", "UNLIT\nINDICATORS", "PORTS", "PORT PLATES", "DIGITS IN\nSERIAL NUMBER",
-        "LETTERS IN\nSERIAL NUMBER", "MODULES" };
+        "LETTERS IN\nSERIAL NUMBER", "MODULES", "TWO FACTORS", "SOLVED MODULES", "PORT TYPES", "STRIKES" };
     private string[] buttonPossibilities = { "RED", "GREEN", "YELLOW", "BLUE", "A", "B", "C", "D", "FIRST", "SECOND", "THIRD", "FOURTH" };
     private string[] labels = { "A", "B", "C", "D" };
     private int correctBtn;
-    private int[] edgework = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    private int[] edgework = new int[14];
     private string[] startingScreens = { "WHO TURNED\nTHE LIGHTS OFF", "KAPOW KAPOW\nKAPOW KAPOW", "TEXT GOES\nHERE, I GUESS", "FUNNY JOKE\nHERE", "GG, YOU CAN\nREAD", "OH CRAP, THE TEXT\nGOES OFF THE SCREEN", "E", "OH SHOOT\nIT'S A BOMB", "HEY I'M YOUR\nFAVORITE MODULE,\nRIGHT?", "\n\n\n\n\n\n\n\n\n\n\n\nI'M DOWN HERE NOW", "CONGRATULATIONS\nYOU FOUND AN\nEASTER EGG", "ARE YOU GOING TO\nBLOW UP THIS\nBOMB?", "SUBSCRIBE TO\nPEWDIEPIE", "I'M GOING TO SAY\nTHE N WORD", "CHALLENGE.\n3, 2, 1.", "*DOES DEFAULT\nDANCE*", "IT'S TIME TO STOP", "STOP READING THE GITHUB" };
     private string[] solveMessages = { "GG", "NICE JOB", "MODULE\nDISARMED", ":D", "MODULE\nSOLVED", "*INSERT CLAP\nEMOJI HERE*", "WOOOOOOOO!", "OH CRAP YOU\nACTUALLY DID IT", "THAT WAS NICE\nOWO", "+6 POINTS!", "AW MAN, NOW\nNOBODY CARES\nABOUT ME :(", ":OK_HAND:", "A WINNER IS YOU", "I'M SO PROUD\nOF YOU", "NEVER MIND, IT\nSOLVED ITSELF.", "I'LL GET YOU NEXT\nTIME" };
     private string[] failureMessages = { "NOPE", "OOF", "+1 STRIKE!", "SMH", "JUST READ THE\nINSTRUCTIONS", "DEFINITELY NOT\nA BUG :)))))", "KABOOOOM!", ":(", "THIS IS SO SAD\nALEXA, PLAY\nDESPACITO", "BETTER CHECK\nTHE LOG!", "REVENGE!!!", "O\nO\nF", "YOU'RE DEAD TO\nME", "...", "YOU'VE VIOLATED AN\nAREA PROTECTED BY\nA SECURITY SYSTEM.", "OH NOOO" };
-    private int[,] screens = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
-    private bool[] edgeworkScreens = { true, false, true, false, false };
-    private int[] edgeworkScreenNumbers = { 0, 2 };
-    private int[] notEdgeworkScreenNumbers = { 1, 3, 4 };
+    private int[,] screens = { { 99, 0 }, { 99, 0 }, { 99, 0 }, { 99, 0 }, { 99, 0 } };
+    private static readonly bool[] edgeworkScreens = { true, false, true, false, false };
     private int[,] buttonTypes = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
-
-    private int[] rulesUsed = { 0, 38, 45, 21, 48 };
-    
-    private int[,] answersUsed = { { 2, 4, 1, 3 }, { 0, 1, 0, 0 }, { 0, 4, 0, 0 }, { 3, 0, 0, 0 }, { 4, 1, 2, 4 }, { 0, 3, 0, 0 } };
-    // Answer types: simple answer, answer furthest to the left, answer furthest to the right, count answer, not any others
-    
     // Use this for initialization (and putting memes on the screen)
     void Start () {
         _moduleID = _moduleIDCounter++;
@@ -85,78 +76,6 @@ public class instructionsScript : MonoBehaviour {
 
     void Init()
     {
-        var rnd = Ruleseed.GetRNG();
-        // The KMBombInfo below is completely useless and because I'm too lazy to find out how to get rid of them and not get errors
-
-        int arrayPos = 0;
-        int notArrayPos = 0;
-
-        if (rnd.Seed != 1)
-        {
-            // Randomize screens
-            for (int screenNum = 0; screenNum < 5; screenNum++)
-            {
-                edgeworkScreens[screenNum] = false;
-            }
-
-            for (int i = 0; i < 2; i++)
-            {
-                int rndNumber = rnd.Next(5);
-
-                if (edgeworkScreens[rndNumber])
-                {
-                    rndNumber = (rndNumber + rnd.Next(4) + 1) % 5;
-                }
-
-                edgeworkScreens[rndNumber] = true;
-            }
-
-            for (int i = 0; i < 5; i++)
-            {
-                if (edgeworkScreens[i])
-                {
-                    edgeworkScreenNumbers[arrayPos] = i;
-                    arrayPos++;
-                }
-
-                else
-                {
-                    notEdgeworkScreenNumbers[notArrayPos] = i;
-                    notArrayPos++;
-                }
-            }
-            
-
-            for (int i = 0; i < 6; i++)
-            {
-                if (i != 5)
-                {
-                    rulesUsed[i] = rnd.Next(48);
-                }
-                
-                answersUsed[i, 0] = rnd.Next(4);
-
-                if (answersUsed[i, 0] == 3)
-                {
-                    answersUsed[i, 1] = edgeworkScreenNumbers[rnd.Next(2)];
-                }
-
-                else
-                {
-                    answersUsed[i, 1] = notEdgeworkScreenNumbers[rnd.Next(3)];
-                }
-                
-                answersUsed[i, 2] = notEdgeworkScreenNumbers[rnd.Next(3)];
-
-                if (answersUsed[i, 1] == answersUsed[i, 2])
-                {
-                    answersUsed[i, 1] = (answersUsed[i, 1] + 1) % 3;
-                }
-                    
-                answersUsed[i, 3] = notEdgeworkScreenNumbers[rnd.Next(3)];
-            }
-        }
-
         // Makes the first screen light green
 
         screenButtons[0].material.color = new Color32(0, 255, 0, 255);
@@ -168,8 +87,6 @@ public class instructionsScript : MonoBehaviour {
         GenerateEdgework();
         GenerateButtons();
         GenerateScreens();
-
-        GenerateAnswer();
     }
     
     void ButtonPressed(int btnNumber)
@@ -177,6 +94,8 @@ public class instructionsScript : MonoBehaviour {
         Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, Module.transform);
 
         if (!_lightsOn || _solved) return;
+
+        GenerateAnswer();
 
         if (btnNumber == correctBtn)
         {
@@ -300,136 +219,62 @@ public class instructionsScript : MonoBehaviour {
     
     void GenerateAnswer()
     {
-        int correctRule = 5;
-
-        // the below uses a KMBombInfo and i'm too lazy to change it. it works just fine ok
-        var rules = new Func<KMBombInfo, bool>[]
+        if (screens[0, 1] == 0)
         {
-            x => screens[edgeworkScreenNumbers[0], 1] == 0,
-            x => screens[edgeworkScreenNumbers[0], 1] == 1,
-            x => screens[edgeworkScreenNumbers[0], 1] == 2,
-            x => screens[edgeworkScreenNumbers[0], 1] == 3,
-            x => screens[edgeworkScreenNumbers[0], 1] == 4,
-            x => screens[edgeworkScreenNumbers[0], 1] == 5,
-            x => screens[edgeworkScreenNumbers[1], 1] == 0,
-            x => screens[edgeworkScreenNumbers[1], 1] == 1,
-            x => screens[edgeworkScreenNumbers[1], 1] == 2,
-            x => screens[edgeworkScreenNumbers[1], 1] == 3,
-            x => screens[edgeworkScreenNumbers[1], 1] == 4,
-            x => screens[edgeworkScreenNumbers[1], 1] == 5,
-            x => screens[edgeworkScreenNumbers[0], 1] > 0,
-            x => screens[edgeworkScreenNumbers[0], 1] > 1,
-            x => screens[edgeworkScreenNumbers[0], 1] > 2,
-            x => screens[edgeworkScreenNumbers[0], 1] > 3,
-            x => screens[edgeworkScreenNumbers[0], 1] > 4,
-            x => screens[edgeworkScreenNumbers[0], 1] > 5,
-            x => screens[edgeworkScreenNumbers[1], 1] > 0,
-            x => screens[edgeworkScreenNumbers[1], 1] > 1,
-            x => screens[edgeworkScreenNumbers[1], 1] > 2,
-            x => screens[edgeworkScreenNumbers[1], 1] > 3,
-            x => screens[edgeworkScreenNumbers[1], 1] > 4,
-            x => screens[edgeworkScreenNumbers[1], 1] > 5,
-            x => screens[edgeworkScreenNumbers[0], 1] < 0,
-            x => screens[edgeworkScreenNumbers[0], 1] < 1,
-            x => screens[edgeworkScreenNumbers[0], 1] < 2,
-            x => screens[edgeworkScreenNumbers[0], 1] < 3,
-            x => screens[edgeworkScreenNumbers[0], 1] < 4,
-            x => screens[edgeworkScreenNumbers[0], 1] < 5,
-            x => screens[edgeworkScreenNumbers[1], 1] < 0,
-            x => screens[edgeworkScreenNumbers[1], 1] < 1,
-            x => screens[edgeworkScreenNumbers[1], 1] < 2,
-            x => screens[edgeworkScreenNumbers[1], 1] < 3,
-            x => screens[edgeworkScreenNumbers[1], 1] < 4,
-            x => screens[edgeworkScreenNumbers[1], 1] < 5,
-            x => screens[edgeworkScreenNumbers[0], 1] == screens[edgeworkScreenNumbers[1], 1],
-            x => screens[edgeworkScreenNumbers[0], 1] > screens[edgeworkScreenNumbers[1], 1],
-            x => screens[edgeworkScreenNumbers[0], 1] < screens[edgeworkScreenNumbers[1], 1],
-
-            x => screens[notEdgeworkScreenNumbers[0], 1] == screens[notEdgeworkScreenNumbers[1], 1],
-            x => screens[notEdgeworkScreenNumbers[1], 1] == screens[notEdgeworkScreenNumbers[2], 1],
-            x => screens[notEdgeworkScreenNumbers[2], 1] == screens[notEdgeworkScreenNumbers[0], 1],
-            x => screens[notEdgeworkScreenNumbers[0], 1] > screens[notEdgeworkScreenNumbers[1], 1],
-            x => screens[notEdgeworkScreenNumbers[1], 1] > screens[notEdgeworkScreenNumbers[2], 1],
-            x => screens[notEdgeworkScreenNumbers[2], 1] > screens[notEdgeworkScreenNumbers[0], 1],
-            x => screens[notEdgeworkScreenNumbers[0], 1] < screens[notEdgeworkScreenNumbers[1], 1],
-            x => screens[notEdgeworkScreenNumbers[1], 1] < screens[notEdgeworkScreenNumbers[2], 1],
-            x => screens[notEdgeworkScreenNumbers[2], 1] < screens[notEdgeworkScreenNumbers[0], 1],
-
-            x => screens[notEdgeworkScreenNumbers[0], 1] != screens[notEdgeworkScreenNumbers[1], 1] && screens[notEdgeworkScreenNumbers[0], 1] != screens[notEdgeworkScreenNumbers[2], 1]
-            && screens[notEdgeworkScreenNumbers[1], 1] != screens[notEdgeworkScreenNumbers[2], 1],
-        };
-
-        for (int ruleNum = 0; ruleNum < 5; ruleNum++)
-        {
-            if (rules[rulesUsed[ruleNum]](Info))
+            if (screens[4, 1] > screens[1, 1])
             {
-                Debug.LogFormat("[Instructions #{0}] Rule {1} applied.", _moduleID, ruleNum + 1);
-                correctRule = ruleNum;
-                break;
-            }
-        }
-
-        if (correctRule == 5)
-        {
-            Debug.LogFormat("[Instructions #{0}] Rule 6 applied.", _moduleID);
-        }
-
-        if (answersUsed[correctRule, 0] == 0)
-        {
-            correctBtn = screens[answersUsed[correctRule, 1], 1];
-        }
-
-        else if (answersUsed[correctRule, 0] == 1)
-        {
-            if (screens[answersUsed[correctRule, 1], 1] > screens[answersUsed[correctRule, 2], 1])
-            {
-                correctBtn = screens[answersUsed[correctRule, 2], 1];
+                correctBtn = screens[4, 1];
             }
 
-            else if (screens[answersUsed[correctRule, 1], 1] < screens[answersUsed[correctRule, 2], 1])
+            else if (screens[4, 1] < screens[1, 1])
             {
-                correctBtn = screens[answersUsed[correctRule, 1], 1];
+                correctBtn = screens[1, 1];
             }
 
             else
             {
-                correctBtn = screens[answersUsed[correctRule, 3], 1];
+                correctBtn = screens[3, 1];
             }
+
+            Debug.LogFormat("[Instructions #{0}] Rule 1 applied.", _moduleID);
         }
 
-        else if (answersUsed[correctRule, 0] == 2)
+        else if (screens[0, 1] < screens[2, 1])
         {
-            if (screens[answersUsed[correctRule, 1], 1] > screens[answersUsed[correctRule, 2], 1])
-            {
-                correctBtn = screens[answersUsed[correctRule, 1], 1];
-            }
-
-            else if (screens[answersUsed[correctRule, 1], 1] < screens[answersUsed[correctRule, 2], 1])
-            {
-                correctBtn = screens[answersUsed[correctRule, 2], 1];
-            }
-
-            else
-            {
-                correctBtn = screens[answersUsed[correctRule, 3], 1];
-            }
+            correctBtn = screens[1, 1];
+            Debug.LogFormat("[Instructions #{0}] Rule 2 applied.", _moduleID);
         }
 
-        else if (answersUsed[correctRule, 0] == 3)
+        else if (screens[1, 1] < screens[3, 1])
         {
-            correctBtn = screens[answersUsed[correctRule, 1], 1] % 4;
+            correctBtn = screens[4, 1];
+            Debug.LogFormat("[Instructions #{0}] Rule 3 applied.", _moduleID);
         }
 
-        else
+        else if (screens[2, 1] > 3)
+        {
+            correctBtn = screens[0, 1] % 4;
+            Debug.LogFormat("[Instructions #{0}] Rule 4 applied.", _moduleID);
+        }
+
+        else if (screens[1, 1] != screens[3, 1] && screens[1, 1] != screens[4, 1] && screens[4, 1] != screens[3, 1])
         {
             for (int i = 0; i < 4; i++)
             {
-                if (screens[notEdgeworkScreenNumbers[0], 1] != i && screens[notEdgeworkScreenNumbers[1], 1] != i && screens[notEdgeworkScreenNumbers[2], 1] != i)
+                if (i != screens[1, 1] && i != screens[3, 1] && i != screens[4, 1])
                 {
                     correctBtn = i;
                     break;
                 }
             }
+
+            Debug.LogFormat("[Instructions #{0}] Rule 5 applied.", _moduleID);
+        }
+
+        else
+        {
+            correctBtn = screens[3, 1];
+            Debug.LogFormat("[Instructions #{0}] Rule 6 applied.", _moduleID);
         }
 
         Debug.LogFormat("[Instructions #{0}] Press button {1}.", _moduleID, correctBtn + 1);
@@ -439,12 +284,6 @@ public class instructionsScript : MonoBehaviour {
     {
         // For the edgework screens, possible words are: BATTERIES, BATTERY HOLDERS, INDICATORS, LIT INDICATORS, UNLIT INDICATORS, PORTS, PORT PLATES, DIGITS IN SERIAL NUMBER, LETTERS IN SERIAL NUMBER, MODULES.
         // For the button screens, possible words are: RED, GREEN, YELLOW, BLUE, A, B, C, D, FIRST, SECOND, THIRD, FOURTH.
-
-        for (int screenNum = 0; screenNum < 5; screenNum++)
-        {
-            screens[screenNum, 0] = 99;
-        }
-
         for (int screenNum = 0; screenNum < 5; screenNum++)
         {
             if (edgeworkScreens[screenNum])
@@ -748,5 +587,9 @@ public class instructionsScript : MonoBehaviour {
         edgework[7] = Info.GetSerialNumberNumbers().Count();
         edgework[8] = Info.GetSerialNumberLetters().Count();
         edgework[9] = Info.GetModuleNames().Count;
+        edgework[10] = Info.GetTwoFactorCounts();
+        edgework[11] = Info.GetSolvedModuleNames().Count();
+        edgework[12] = Info.CountUniquePorts();
+        edgework[13] = Info.GetStrikes();
     }
 }
